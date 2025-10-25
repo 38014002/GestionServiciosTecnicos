@@ -94,7 +94,6 @@ class ServiceViewModel(application: Application) : AndroidViewModel(application)
         _formState.value = ServiceFormState()
     }
 
-    // --- Funciones antiguas ---
     val allServiceOrders: Flow<List<ServiceOrder>> = repository.allServiceOrders
 
     fun updateService(service: Service) = viewModelScope.launch {

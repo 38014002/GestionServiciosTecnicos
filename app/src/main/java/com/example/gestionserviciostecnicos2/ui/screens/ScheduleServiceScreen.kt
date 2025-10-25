@@ -2,6 +2,7 @@ package com.example.gestionserviciostecnicos2.ui.screens
 
 import android.Manifest
 import android.net.Uri
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -16,14 +17,10 @@ import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.example.gestionserviciostecnicos2.ui.components.CustomTextField
 import com.example.gestionserviciostecnicos2.viewmodel.ServiceViewModel
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.isGranted
-import com.google.accompanist.permissions.rememberPermissionState
 import androidx.core.content.FileProvider
 import java.io.File
-import java.util.Objects
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScheduleServiceScreen(
     serviceViewModel: ServiceViewModel,
@@ -34,7 +31,7 @@ fun ScheduleServiceScreen(
 
     // --- Lógica para seleccionar imágenes ---
 
-    // 1. Launcher para la galería
+    // Launcher para la galería
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
         onResult = { uri ->
@@ -42,16 +39,28 @@ fun ScheduleServiceScreen(
         }
     )
 
-    // 2. Launcher para la cámara
-    val cameraPermissionState = rememberPermissionState(permission = Manifest.permission.CAMERA)
+    // Uris y launchers para la cámara
     val file = File(context.cacheDir, "camera_photo.jpg")
-    val imageUri = FileProvider.getUriForFile(context, "com.example.gestionserviciostecnicos2.provider", file)
+    val imageUri = FileProvider.getUriForFile(context, "${context.packageName}.provider", file)
 
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture(),
         onResult = { success ->
             if (success) {
                 serviceViewModel.onImageUriChange(imageUri)
+            }
+        }
+    )
+
+    // Launcher para el permiso de la cámara
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = { isGranted ->
+            if (isGranted) {
+                cameraLauncher.launch(imageUri)
+            } else {
+                // Mostrar un mensaje si el usuario deniega el permiso
+                Toast.makeText(context, "Permiso de cámara denegado", Toast.LENGTH_SHORT).show()
             }
         }
     )
@@ -100,12 +109,8 @@ fun ScheduleServiceScreen(
 
         // Botones para adjuntar foto
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Button(onClick = {
-                if (cameraPermissionState.status.isGranted) { // <-- ¡LÍNEA CORREGIDA!
-                    cameraLauncher.launch(imageUri)
-                } else {
-                    cameraPermissionState.launchPermissionRequest()
-                }
+            Button(onClick = { 
+                cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
             }) {
                 Text("Tomar Foto")
             }

@@ -77,7 +77,7 @@ fun ServiceDetailScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.weight(1f)) // Empuja el botón de eliminar hacia abajo
+            Spacer(modifier = Modifier.weight(1f))
 
             Button(
                 onClick = { showDialog = true },
