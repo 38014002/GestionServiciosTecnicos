@@ -20,14 +20,14 @@ import java.util.Locale
 
 // Estado del formulario de servicio
 data class ServiceFormState(
-    val clientName: String = "",
-    val deviceType: String = "",
-    val issueDescription: String = "",
-    val imageUri: Uri? = null,
-    val clientNameError: String? = null,
-    val deviceTypeError: String? = null,
-    val issueDescriptionError: String? = null,
-    val isSaved: Boolean = false
+    val nombreCliente: String = "",
+    val tipoDispositivo: String = "",
+    val descripcionProblema: String = "",
+    val uriImagen: Uri? = null,
+    val errorNombreCliente: String? = null,
+    val errorTipoDispositivo: String? = null,
+    val errorDescripcionProblema: String? = null,
+    val guardadoExitoso: Boolean = false
 )
 
 class ServiceViewModel(application: Application) : AndroidViewModel(application) {
@@ -46,31 +46,31 @@ class ServiceViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun onClientNameChange(name: String) {
-        _formState.update { it.copy(clientName = name, clientNameError = null) }
+        _formState.update { it.copy(nombreCliente = name, errorNombreCliente = null) }
     }
 
     fun onDeviceTypeChange(type: String) {
-        _formState.update { it.copy(deviceType = type, deviceTypeError = null) }
+        _formState.update { it.copy(tipoDispositivo = type, errorTipoDispositivo = null) }
     }
 
     fun onIssueDescriptionChange(description: String) {
-        _formState.update { it.copy(issueDescription = description, issueDescriptionError = null) }
+        _formState.update { it.copy(descripcionProblema = description, errorDescripcionProblema = null) }
     }
 
     fun onImageUriChange(uri: Uri?) {
-        _formState.update { it.copy(imageUri = uri) }
+        _formState.update { it.copy(uriImagen = uri) }
     }
 
     fun saveService() {
         val state = _formState.value
-        val hasError = state.clientName.isBlank() || state.deviceType.isBlank() || state.issueDescription.isBlank()
+        val hasError = state.nombreCliente.isBlank() || state.tipoDispositivo.isBlank() || state.descripcionProblema.isBlank()
 
         if (hasError) {
             _formState.update {
                 it.copy(
-                    clientNameError = if (state.clientName.isBlank()) "Ingrese Un Nombre" else null,
-                    deviceTypeError = if (state.deviceType.isBlank()) "Ingrese el Producto" else null,
-                    issueDescriptionError = if (state.issueDescription.isBlank()) "Campo requerido" else null
+                    errorNombreCliente = if (state.nombreCliente.isBlank()) "Ingrese Un Nombre" else null,
+                    errorTipoDispositivo = if (state.tipoDispositivo.isBlank()) "Ingrese el Producto" else null,
+                    errorDescripcionProblema = if (state.descripcionProblema.isBlank()) "Campo requerido" else null
                 )
             }
             return
@@ -78,15 +78,15 @@ class ServiceViewModel(application: Application) : AndroidViewModel(application)
 
         viewModelScope.launch {
             val newService = Service(
-                clientName = state.clientName,
-                deviceType = state.deviceType,
-                issueDescription = state.issueDescription,
+                clientName = state.nombreCliente,
+                deviceType = state.tipoDispositivo,
+                issueDescription = state.descripcionProblema,
                 entryDate = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date()),
                 status = "Pendiente",
-                imageUri = state.imageUri?.toString()
+                imageUri = state.uriImagen?.toString()
             )
             repository.insertService(newService)
-            _formState.update { it.copy(isSaved = true) } // Indica que se guardó
+            _formState.update { it.copy(guardadoExitoso = true) } // Indica que se guardó
         }
     }
 

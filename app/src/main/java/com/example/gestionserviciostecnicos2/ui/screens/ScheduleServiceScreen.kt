@@ -59,7 +59,6 @@ fun ScheduleServiceScreen(
             if (isGranted) {
                 cameraLauncher.launch(imageUri)
             } else {
-                // Mostrar un mensaje si el usuario deniega el permiso
                 Toast.makeText(context, "Permiso de cámara denegado", Toast.LENGTH_SHORT).show()
             }
         }
@@ -67,8 +66,8 @@ fun ScheduleServiceScreen(
 
     // --- Efectos y UI ---
 
-    LaunchedEffect(formState.isSaved) {
-        if (formState.isSaved) {
+    LaunchedEffect(formState.guardadoExitoso) {
+        if (formState.guardadoExitoso) {
             onServiceScheduled()
             serviceViewModel.resetFormState()
         }
@@ -83,27 +82,27 @@ fun ScheduleServiceScreen(
         Text(text = "Agendar un Nuevo Servicio", style = MaterialTheme.typography.headlineMedium)
 
         CustomTextField(
-            value = formState.clientName,
+            value = formState.nombreCliente,
             onValueChange = { serviceViewModel.onClientNameChange(it) },
             label = "Nombre del Cliente",
-            isError = formState.clientNameError != null,
-            errorText = formState.clientNameError
+            isError = formState.errorNombreCliente != null,
+            errorText = formState.errorNombreCliente
         )
 
         CustomTextField(
-            value = formState.deviceType,
+            value = formState.tipoDispositivo,
             onValueChange = { serviceViewModel.onDeviceTypeChange(it) },
             label = "Tipo de Dispositivo",
-            isError = formState.deviceTypeError != null,
-            errorText = formState.deviceTypeError
+            isError = formState.errorTipoDispositivo != null,
+            errorText = formState.errorTipoDispositivo
         )
 
         CustomTextField(
-            value = formState.issueDescription,
+            value = formState.descripcionProblema,
             onValueChange = { serviceViewModel.onIssueDescriptionChange(it) },
             label = "Descripción del Problema",
-            isError = formState.issueDescriptionError != null,
-            errorText = formState.issueDescriptionError,
+            isError = formState.errorDescripcionProblema != null,
+            errorText = formState.errorDescripcionProblema,
             maxLines = 5
         )
 
@@ -120,7 +119,7 @@ fun ScheduleServiceScreen(
         }
 
         // Vista previa de la imagen
-        formState.imageUri?.let {
+        formState.uriImagen?.let {
             Image(
                 painter = rememberAsyncImagePainter(it),
                 contentDescription = "Vista previa de la imagen",
