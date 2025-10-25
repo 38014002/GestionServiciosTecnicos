@@ -1,25 +1,67 @@
 package com.example.gestionserviciostecnicos2.ui.screens
 
+import android.Manifest
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import coil.compose.rememberAsyncImagePainter
+import com.example.gestionserviciostecnicos2.ui.components.CustomTextField
 import com.example.gestionserviciostecnicos2.viewmodel.ServiceViewModel
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
+import androidx.core.content.FileProvider
+import java.io.File
+import java.util.Objects
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
 fun ScheduleServiceScreen(
-    serviceViewModel: ServiceViewModel, 
+    serviceViewModel: ServiceViewModel,
     onServiceScheduled: () -> Unit
 ) {
     val formState by serviceViewModel.formState.collectAsState()
+    val context = LocalContext.current
 
-    // Navega hacia atrás cuando el estado isSaved cambia a true
+    // --- Lógica para seleccionar imágenes ---
+
+    // 1. Launcher para la galería
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = { uri ->
+            uri?.let { serviceViewModel.onImageUriChange(it) }
+        }
+    )
+
+    // 2. Launcher para la cámara
+    val cameraPermissionState = rememberPermissionState(permission = Manifest.permission.CAMERA)
+    val file = File(context.cacheDir, "camera_photo.jpg")
+    val imageUri = FileProvider.getUriForFile(context, "com.example.gestionserviciostecnicos2.provider", file)
+
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture(),
+        onResult = { success ->
+            if (success) {
+                serviceViewModel.onImageUriChange(imageUri)
+            }
+        }
+    )
+
+    // --- Efectos y UI ---
+
     LaunchedEffect(formState.isSaved) {
         if (formState.isSaved) {
             onServiceScheduled()
-            serviceViewModel.resetFormState() // Resetea el estado para la próxima vez
+            serviceViewModel.resetFormState()
         }
     }
 
@@ -27,49 +69,64 @@ fun ScheduleServiceScreen(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Text(text = "Agendar un Nuevo Servicio", style = MaterialTheme.typography.headlineMedium)
-        
-        Spacer(modifier = Modifier.height(16.dp))
 
-        OutlinedTextField(
+        CustomTextField(
             value = formState.clientName,
             onValueChange = { serviceViewModel.onClientNameChange(it) },
-            label = { Text("Nombre del Cliente") },
-            modifier = Modifier.fillMaxWidth(),
+            label = "Nombre del Cliente",
             isError = formState.clientNameError != null,
-            singleLine = true
+            errorText = formState.clientNameError
         )
-        formState.clientNameError?.let {
-            Text(text = it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
-        }
 
-        OutlinedTextField(
+        CustomTextField(
             value = formState.deviceType,
             onValueChange = { serviceViewModel.onDeviceTypeChange(it) },
-            label = { Text("Tipo de Dispositivo") },
-            modifier = Modifier.fillMaxWidth(),
+            label = "Tipo de Dispositivo",
             isError = formState.deviceTypeError != null,
-            singleLine = true
+            errorText = formState.deviceTypeError
         )
-        formState.deviceTypeError?.let {
-            Text(text = it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
-        }
 
-        OutlinedTextField(
+        CustomTextField(
             value = formState.issueDescription,
             onValueChange = { serviceViewModel.onIssueDescriptionChange(it) },
-            label = { Text("Descripción del Problema") },
-            modifier = Modifier.fillMaxWidth(),
+            label = "Descripción del Problema",
             isError = formState.issueDescriptionError != null,
+            errorText = formState.issueDescriptionError,
             maxLines = 5
         )
-        formState.issueDescriptionError?.let {
-            Text(text = it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+
+        // Botones para adjuntar foto
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Button(onClick = {
+                if (cameraPermissionState.status.isGranted) { // <-- ¡LÍNEA CORREGIDA!
+                    cameraLauncher.launch(imageUri)
+                } else {
+                    cameraPermissionState.launchPermissionRequest()
+                }
+            }) {
+                Text("Tomar Foto")
+            }
+            Button(onClick = { galleryLauncher.launch("image/*") }) {
+                Text("Desde Galería")
+            }
         }
-        
-        Spacer(modifier = Modifier.height(16.dp))
+
+        // Vista previa de la imagen
+        formState.imageUri?.let {
+            Image(
+                painter = rememberAsyncImagePainter(it),
+                contentDescription = "Vista previa de la imagen",
+                modifier = Modifier
+                    .size(100.dp)
+                    .align(Alignment.CenterHorizontally),
+                contentScale = ContentScale.Crop
+            )
+        }
+
+        Spacer(modifier = Modifier.weight(1f))
 
         Button(
             onClick = { serviceViewModel.saveService() },

@@ -24,9 +24,9 @@ import androidx.room.PrimaryKey
 data class ServiceOrder(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
-    val clientId: Int, // Foreign key to User
-    val technicianId: Int?, // Foreign key to User (can be null)
-    val serviceId: Int, // Foreign key to Service
+    val clientId: Int,
+    val technicianId: Int?,
+    val serviceId: Int,
     val orderDate: String,
-    val status: String // e.g., "pending", "in_progress", "completed"
+    val status: String //
 )

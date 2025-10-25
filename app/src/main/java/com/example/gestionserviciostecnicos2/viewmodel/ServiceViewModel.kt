@@ -1,6 +1,7 @@
 package com.example.gestionserviciostecnicos2.viewmodel
 
 import android.app.Application
+import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.gestionserviciostecnicos2.data.AppDatabase
@@ -22,6 +23,7 @@ data class ServiceFormState(
     val clientName: String = "",
     val deviceType: String = "",
     val issueDescription: String = "",
+    val imageUri: Uri? = null,
     val clientNameError: String? = null,
     val deviceTypeError: String? = null,
     val issueDescriptionError: String? = null,
@@ -39,7 +41,7 @@ class ServiceViewModel(application: Application) : AndroidViewModel(application)
 
     init {
         val db = AppDatabase.getDatabase(application)
-        repository = ServiceRepository(db.serviceDao(), db.serviceOrderDao()) // Asumiendo que aún necesitas serviceOrderDao
+        repository = ServiceRepository(db.serviceDao(), db.serviceOrderDao())
         allServices = repository.allServices
     }
 
@@ -55,6 +57,10 @@ class ServiceViewModel(application: Application) : AndroidViewModel(application)
         _formState.update { it.copy(issueDescription = description, issueDescriptionError = null) }
     }
 
+    fun onImageUriChange(uri: Uri?) {
+        _formState.update { it.copy(imageUri = uri) }
+    }
+
     fun saveService() {
         val state = _formState.value
         val hasError = state.clientName.isBlank() || state.deviceType.isBlank() || state.issueDescription.isBlank()
@@ -62,8 +68,8 @@ class ServiceViewModel(application: Application) : AndroidViewModel(application)
         if (hasError) {
             _formState.update {
                 it.copy(
-                    clientNameError = if (state.clientName.isBlank()) "Campo requerido" else null,
-                    deviceTypeError = if (state.deviceType.isBlank()) "Campo requerido" else null,
+                    clientNameError = if (state.clientName.isBlank()) "Ingrese Un Nombre" else null,
+                    deviceTypeError = if (state.deviceType.isBlank()) "Ingrese el Producto" else null,
                     issueDescriptionError = if (state.issueDescription.isBlank()) "Campo requerido" else null
                 )
             }
@@ -76,7 +82,8 @@ class ServiceViewModel(application: Application) : AndroidViewModel(application)
                 deviceType = state.deviceType,
                 issueDescription = state.issueDescription,
                 entryDate = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date()),
-                status = "Pendiente"
+                status = "Pendiente",
+                imageUri = state.imageUri?.toString()
             )
             repository.insertService(newService)
             _formState.update { it.copy(isSaved = true) } // Indica que se guardó
@@ -87,7 +94,7 @@ class ServiceViewModel(application: Application) : AndroidViewModel(application)
         _formState.value = ServiceFormState()
     }
 
-    // --- Funciones antiguas (pueden ser refactorizadas o eliminadas si no se usan) ---
+    // --- Funciones antiguas ---
     val allServiceOrders: Flow<List<ServiceOrder>> = repository.allServiceOrders
 
     fun updateService(service: Service) = viewModelScope.launch {

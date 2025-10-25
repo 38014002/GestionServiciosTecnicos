@@ -50,7 +50,10 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
-    implementation(libs.androidx.compose.material.icons.extended) // <-- Añadido
+    implementation(libs.androidx.compose.material.icons.extended)
+
+    // Accompanist (Permisos)
+    implementation(libs.accompanist.permissions)
 
     // PERSISTENCIA (ROOM / SQLITE)
     implementation(libs.androidx.room.runtime)

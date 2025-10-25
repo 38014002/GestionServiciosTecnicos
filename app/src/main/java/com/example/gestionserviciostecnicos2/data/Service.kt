@@ -11,5 +11,6 @@ data class Service(
     val deviceType: String,
     val issueDescription: String,
     val entryDate: String,
-    val status: String
+    val status: String,
+    val imageUri: String? = null
 )

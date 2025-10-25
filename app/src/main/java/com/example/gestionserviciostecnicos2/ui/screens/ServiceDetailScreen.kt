@@ -1,5 +1,6 @@
 package com.example.gestionserviciostecnicos2.ui.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -8,10 +9,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.rememberAsyncImagePainter
 import com.example.gestionserviciostecnicos2.viewmodel.ServiceViewModel
 
 @Composable
@@ -29,6 +34,21 @@ fun ServiceDetailScreen(
             .padding(16.dp)
     ) {
         service?.let { currentService ->
+
+            // Muestra la imagen si existe
+            currentService.imageUri?.let {
+                Image(
+                    painter = rememberAsyncImagePainter(it.toUri()),
+                    contentDescription = "Imagen del servicio",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .align(Alignment.CenterHorizontally),
+                    contentScale = ContentScale.Crop
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
             Text(text = "Nombre del Cliente: ${currentService.clientName}")
             Text(text = "Tipo de Dispositivo: ${currentService.deviceType}")
             Text(text = "Descripción del Problema: ${currentService.issueDescription}")

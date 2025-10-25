@@ -11,16 +11,16 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.gestionserviciostecnicos2.data.Service
+import com.example.gestionserviciostecnicos2.ui.components.ServiceCard
 import com.example.gestionserviciostecnicos2.viewmodel.ServiceViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OrderMonitorScreen(
-    serviceViewModel: ServiceViewModel, // <-- ¡CORREGIDO!
+    serviceViewModel: ServiceViewModel,
     onScheduleServiceClick: () -> Unit,
     onServiceOrderClick: (Int) -> Unit
 ) {
@@ -88,36 +88,9 @@ fun OrderMonitorScreen(
                     .fillMaxSize()
             ) {
                 items(filteredServices) { service ->
-                    ServiceItem(service = service, onClick = { onServiceOrderClick(service.id) })
+                    ServiceCard(service = service, onClick = { onServiceOrderClick(service.id) })
                 }
             }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun ServiceItem(service: Service, onClick: () -> Unit) {
-    val cardColor = when (service.status) {
-        "Pendiente" -> Color(0xFFFFF9C4) // Amarillo claro
-        "En Proceso" -> Color(0xFFBBDEFB) // Azul claro
-        "Finalizado" -> Color(0xFFC8E6C9) // Verde claro
-        else -> MaterialTheme.colorScheme.surfaceVariant
-    }
-
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 4.dp),
-        onClick = onClick,
-        colors = CardDefaults.cardColors(
-            containerColor = cardColor
-        )
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = "Cliente: ${service.clientName}")
-            Text(text = "Equipo: ${service.deviceType}")
-            Text(text = "Estado: ${service.status}")
         }
     }
 }
