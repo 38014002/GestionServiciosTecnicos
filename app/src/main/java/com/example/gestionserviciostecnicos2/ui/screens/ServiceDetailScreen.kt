@@ -83,8 +83,8 @@ fun ServiceDetailScreen(
                 onClick = { showDialog = true },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
-            ) {
-                Text("Eliminar Solicitud")
+            ) { Text("Eliminar Solicitud")
+
             }
         }
     }

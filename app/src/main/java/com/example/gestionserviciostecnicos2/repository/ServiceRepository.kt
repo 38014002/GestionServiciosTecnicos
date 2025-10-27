@@ -4,15 +4,21 @@ import com.example.gestionserviciostecnicos2.data.Service
 import com.example.gestionserviciostecnicos2.data.ServiceDao
 import com.example.gestionserviciostecnicos2.data.ServiceOrder
 import com.example.gestionserviciostecnicos2.data.ServiceOrderDao
+import com.example.gestionserviciostecnicos2.data.User
+import com.example.gestionserviciostecnicos2.data.UserDao
 import kotlinx.coroutines.flow.Flow
 
-class ServiceRepository(private val serviceDao: ServiceDao, private val serviceOrderDao: ServiceOrderDao) {
+class ServiceRepository(
+    private val serviceDao: ServiceDao,
+    private val serviceOrderDao: ServiceOrderDao,
+    private val userDao: UserDao
+) {
 
     val allServices: Flow<List<Service>> = serviceDao.getAllServices()
     val allServiceOrders: Flow<List<ServiceOrder>> = serviceOrderDao.getAllServiceOrders()
 
-    suspend fun insertService(service: Service) {
-        serviceDao.insertService(service)
+    suspend fun insertService(service: Service): Long {
+        return serviceDao.insertService(service)
     }
 
     suspend fun updateService(service: Service) {
@@ -27,6 +33,10 @@ class ServiceRepository(private val serviceDao: ServiceDao, private val serviceO
         serviceOrderDao.insertServiceOrder(serviceOrder)
     }
 
+    suspend fun deleteServiceOrder(serviceOrder: ServiceOrder) {
+        serviceOrderDao.deleteServiceOrder(serviceOrder)
+    }
+
     fun getServiceById(serviceId: Int): Flow<Service> {
         return serviceDao.getServiceById(serviceId)
     }
@@ -37,5 +47,13 @@ class ServiceRepository(private val serviceDao: ServiceDao, private val serviceO
 
     fun getServiceOrdersForUser(userId: Int): Flow<List<ServiceOrder>> {
         return serviceOrderDao.getServiceOrdersForUser(userId)
+    }
+
+    fun getUserById(userId: Int): Flow<User> {
+        return userDao.getUserById(userId)
+    }
+
+    suspend fun insertUser(user: User) {
+        userDao.insertUser(user)
     }
 }

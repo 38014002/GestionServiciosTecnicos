@@ -36,6 +36,7 @@ fun ServiceCard(service: Service, onClick: () -> Unit) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(text = "Cliente: ${service.clientName}")
             Text(text = "Equipo: ${service.deviceType}")
+            Text(text = "Fecha: ${service.entryDate}")
             Text(text = "Estado: ${service.status}")
         }
     }
